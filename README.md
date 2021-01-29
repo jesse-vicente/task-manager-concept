@@ -5,7 +5,7 @@ Este é uma simples aplicação para gerenciamento de tarefas utilizando React N
   <img width="75%" alt="Screens" title="Task Manager Concept Screens" src="https://i.imgur.com/Xlj60OA.png" />
 </h1>
 
-### 🛠 Techs
+## 🛠 Tecnologias
 
 As principais tecnologias utilizadas neste projeto foram as seguintes:
 
