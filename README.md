@@ -1,5 +1,5 @@
 # Task Manager Concept
-Este é uma simples aplicação para gerenciamento de tarefas utilizando React Native e Node.js que serviu como prova de conceito para a meu trabalho de graduação do curso de Sistemas de Informação em 2020.
+Este é uma simples aplicação para gerenciamento de tarefas utilizando React Native e Node.js que foi desenvolvida como prova de conceito para o meu trabalho de graduação do curso de Sistemas de Informação em 2020.
 
 <h1 align="center">
   <img width="75%" alt="Screens" title="Task Manager Concept Screens" src="https://i.imgur.com/Xlj60OA.png" />
