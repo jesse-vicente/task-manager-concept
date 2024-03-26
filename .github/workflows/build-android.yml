@@ -36,7 +36,9 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install dependencies
-        run: npm install
+        run: |
+          cd mobile
+          yarn install
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
@@ -54,11 +56,12 @@ jobs:
 
       - name: Execute Gradle build
         run: |
-          cd android
+          cd mobile/android
           ./gradlew build
 
       - name: Build Android JS Bundle
         run: |
+          cd mobile
           yarn run package-android
 
       - name: Delete Android build duplicate assets resource
@@ -66,12 +69,12 @@ jobs:
 
       - name: Install bundler
         run: |
-          cd android
+          cd mobile/android
           gem install bundler
 
       - name: Install gem plugins
         run: |
-          cd android
+          cd mobile/android
           bundle install
 
       # - name: Run fastlane
