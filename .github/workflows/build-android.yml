@@ -6,24 +6,24 @@ on:
       - main
 
 jobs:
-  # CI:
-  #   name: Continuous Integration
-  #   runs-on: self-hosted
+  CI:
+    name: Continuous Integration
+    runs-on: self-hosted
 
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-  #     - name: Setup Node
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: 16.x
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
 
-  #     - name: Install dependencies
-  #       run: npm install
+      - name: Install dependencies
+        run: npm install
 
-  #     - name: Run Tests
-  #       run: pnpm test
+      - name: Run Tests
+        run: pnpm test
 
   android-build:
     name: Android Dev Build
@@ -35,10 +35,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+
       - name: Install dependencies
         run: |
           cd mobile
           yarn install
+
+      - name: Run Tests
+        run: yarn test
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
@@ -54,11 +62,11 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
 
-      - name: Execute Gradle build
-        run: |
-          cd mobile/android
-          chmod +x gradlew
-          ./gradlew build
+      # - name: Execute Gradle build
+      #   run: |
+      #     cd mobile/android
+      #     chmod +x gradlew
+      #     ./gradlew build
 
       - name: Build Android JS Bundle
         run: |
