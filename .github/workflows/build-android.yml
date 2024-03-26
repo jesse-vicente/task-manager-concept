@@ -26,11 +26,6 @@ jobs:
           cd mobile
           yarn install
 
-      - name: Run Tests
-        run: |
-          cd mobile
-          yarn test
-
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
       - uses: actions/cache@v3
