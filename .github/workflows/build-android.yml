@@ -27,21 +27,16 @@ jobs:
 
   android-build:
     name: Android Dev Build
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
-      - name: Show self-hosted machine infomation
-        run: uname -a
-
       - name: Cancel previous runs
         uses: styfle/cancel-workflow-action@0.9.1
 
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          ref: dev
 
       - name: Install dependencies
-        run: npm i --legacy-peer-deps
+        run: npm install
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
