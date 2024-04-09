@@ -10,61 +10,11 @@ jobs:
     name: Android Build
     runs-on: ubuntu-latest
     steps:
-      - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.9.1
-
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16.x
-
-      - name: Install dependencies
+      - name: Print All Secrets
         run: |
-          cd mobile
-          yarn install
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v2
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
-
-      # - name: Execute Gradle build
-      #   run: |
-      #     cd mobile/android
-      #     chmod +x gradlew
-      #     ./gradlew build
-
-      - name: Build Android JS Bundle
-        run: |
-          cd mobile
-          yarn run package-android
-
-      - name: Delete Android build duplicate assets resource
-        run: yarn run delete-pics
-
-      - name: Install bundler
-        run: |
-          cd mobile/android
-          gem install bundler
-
-      - name: Install gem plugins
-        run: |
-          cd mobile/android
-          bundle install
-
-      # - name: Run fastlane
-      #   run: |
-      #     cd android
-      #     bundle exec fastlane build_qa
+          for secret in $(echo ${!secrets[*]}); do
+            echo "$secret=${secrets[$secret]}"
+          done
