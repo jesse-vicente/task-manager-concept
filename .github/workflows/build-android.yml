@@ -13,8 +13,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Print All Secrets
-        run: |
-          for secret in $(echo ${!secrets[*]}); do
-            echo "$secret=${secrets[$secret]}"
-          done
+      - name: Usar o segredo
+        run: echo "MY_SECRET = '${{ secrets.MY_SECRET }}'"
+
+      - name: Usar o segredo
+        run: echo MY_SECRET 2 = ${{ secrets.MY_SECRET }}
+
+
+
