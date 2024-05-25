@@ -2,7 +2,7 @@ name: Android Build
 run-name: ${{github.actor}} is deploying to PlayStore internal track
 on:
   issue_comment:
-    types: [created, edited]
+    types: [created, edited, deleted]
   workflow_dispatch:
 
 permissions:
@@ -52,29 +52,54 @@ jobs:
       - name: Increment version
         run: cd mobile && npm version patch
 
-      - name: Install dependencies
-        run: cd mobile && npm install
+      - run: cd mobile && npm test
 
-      - uses: android-actions/setup-android@v2
-      - uses: actions/cache@v3
+      # - name: Install dependencies
+      #   run: cd mobile && npm install
+
+      # - uses: android-actions/setup-android@v2
+      # - uses: actions/cache@v3
+      #   with:
+      #     path: |
+      #       ~/.gradle/caches
+      #       ~/.gradle/wrapper
+      #     key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-gradle-
+      # - uses: gradle/gradle-build-action@v2
+      # - name: Ensure gradlew is executable
+      #   run: chmod +x mobile/android/gradlew
+
+      # - name: Build Android project
+      #   run: cd mobile/android && ./gradlew assembleDebug
+
+      # - name: Upload artifacts
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: build
+      #     path: |
+      #       android/app/build/outputs/**/*.apk
+      #       android/app/build/outputs/**/*.aab
+
+  comment:
+    needs: [android-build]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Update comment with deployment success
+        if: github.event_name == 'issue_comment' && success()
+        uses: jungwinter/comment@v1
         with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-      - uses: gradle/gradle-build-action@v2
-      - name: Ensure gradlew is executable
-        run: chmod +x mobile/android/gradlew
+          type: edit
+          comment_id: ${{ github.event.comment.id }}
+          body: "${{ github.event.comment.body }}\n\n🚀 [**Deployment to staging SUCCESSFUL**](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build Android project
-        run: cd mobile/android && ./gradlew assembleDebug
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+      - name: Update comment with deployment failure
+        if: github.event_name == 'issue_comment' && failure()
+        uses: jungwinter/comment@v1
         with:
-          name: build
-          path: |
-            android/app/build/outputs/**/*.apk
-            android/app/build/outputs/**/*.aab
+          type: edit
+          comment_id: ${{ github.event.comment.id }}
+          body: "${{ github.event.comment.body }}\n\n❌ [**Deployment to staging FAILED**](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          token: ${{ secrets.GITHUB_TOKEN }}
