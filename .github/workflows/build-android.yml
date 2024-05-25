@@ -49,7 +49,7 @@ jobs:
       - name: Install Fastlane dependencies
         run: cd mobile/android && bundle install
 
-      - run: cd mobile/android && bundle exec fastlane test
+      - run: "cd mobile/android && bundle exec fastlane test force: true"
 
   comment:
     needs: [android-build]
