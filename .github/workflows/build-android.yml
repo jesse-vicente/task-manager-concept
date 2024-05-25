@@ -41,19 +41,18 @@ jobs:
       - name: Extract whitelabel parameter
         run: echo "WHITELABEL=$(echo '${{ github.event.comment.body }}' | sed -n 's|^/deploy-internal-\(.*\)|\1|p')" >> $GITHUB_ENV
 
-      - name: Display whitelabel
-        run: echo "running deployment for $WHITELABEL"
+      # - name: Setup Node.js
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: "14"
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "14"
+      # - name: Increment version
+      #   run: cd mobile && npm version patch
 
-      - name: Increment version
-        run: cd mobile && npm version patch
+      # - name: Install dependencies
+      #   run: cd mobile && npm install
 
-      - name: Install dependencies
-        run: cd mobile && npm install
+      - run: echo "bundle exec fastlane deploy flavor:$WHITELABEL"
 
       # - run: cd mobile && npm test
 
