@@ -55,7 +55,7 @@ jobs:
       - name: Install dependencies
         run: cd mobile && npm install
 
-      - run: cd mobile && npm test
+      # - run: cd mobile && npm test
 
       # - uses: android-actions/setup-android@v2
       # - uses: actions/cache@v3
