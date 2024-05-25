@@ -49,6 +49,9 @@ jobs:
             ${{ runner.os }}-gradle-
       - uses: gradle/gradle-build-action@v2
 
+      - name: Ensure gradlew is executable
+        run: chmod +x mobile/android/gradlew
+        
       - name: Build Android project
         run: cd mobile/android && ./gradlew assembleDebug
 
