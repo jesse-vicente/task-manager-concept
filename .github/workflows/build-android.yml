@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
 
       - name: Extract whitelabel parameter
         run: echo "WHITELABEL=$(echo '${{ github.event.comment.body }}' | sed -n 's|^/deploy-internal-\(.*\)|\1|p')" >> $GITHUB_ENV
