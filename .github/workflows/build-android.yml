@@ -25,3 +25,31 @@ jobs:
 
       - name: Display whitelabel
         run: echo "running deployment for $WHITELABEL"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "14"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Increment version
+        run: npm version patch
+
+      - name: Setup JDK 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: "adopt"
+          java-version: "11"
+
+      - name: Build Android project
+        run: ./gradlew assembleDebug
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: build
+          path: |
+            android/app/build/outputs/**/*.apk
+            android/app/build/outputs/**/*.aab
