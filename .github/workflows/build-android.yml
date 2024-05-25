@@ -38,8 +38,16 @@ jobs:
       - name: Install dependencies
         run: cd mobile && npm install
 
-      - name: Ensure gradlew is executable
-        run: chmod +x mobile/android/gradlew
+      - uses: android-actions/setup-android@v2
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - uses: gradle/gradle-build-action@v2
 
       - name: Build Android project
         run: cd mobile/android && ./gradlew assembleDebug
