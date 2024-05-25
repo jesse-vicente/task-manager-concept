@@ -44,7 +44,7 @@ jobs:
           java-version: "11"
 
       - name: Build Android project
-        run: cd mobile/android && ./gradlew assembleDebug
+        run: cd mobile/android && sudo ./gradlew assembleDebug
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
