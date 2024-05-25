@@ -3,7 +3,7 @@ default_platform(:android)
 platform :android do
   lane :test do
     commit_android_version_bump(
-      gradle_file_folder: "android"
+      gradle_file_folder: ""
     )
   end
 end
