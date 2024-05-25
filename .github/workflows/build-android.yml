@@ -3,6 +3,9 @@ name: Android Build
 on:
   issue_comment:
     types: [created, edited, deleted]
+  push:
+    branches:
+      - feat/testing-trigger
   workflow_dispatch:
 
 permissions:
