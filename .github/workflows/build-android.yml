@@ -43,8 +43,11 @@ jobs:
           distribution: "adopt"
           java-version: "11"
 
+      - name: Ensure gradlew is executable
+        run: chmod +x mobile/android/gradlew
+
       - name: Build Android project
-        run: cd mobile/android && sudo ./gradlew assembleDebug
+        run: cd mobile/android && ./gradlew assembleDebug
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
