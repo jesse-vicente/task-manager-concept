@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ steps.get-branch.outputs.branch }
+          ref: ${{ steps.get-branch.outputs.branch }}
 
       - name: Extract whitelabel parameter
         run: echo "WHITELABEL=$(echo '${{ github.event.comment.body }}' | sed -n 's|^/deploy-internal-\(.*\)|\1|p')" >> $GITHUB_ENV
