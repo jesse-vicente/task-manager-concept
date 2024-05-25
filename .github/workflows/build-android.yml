@@ -1,8 +1,8 @@
-name: build
-
+name: Android Build
+run-name: ${{github.actor}} is deploying to PlayStore internal track
 on:
   issue_comment:
-    types: [created, edited]
+    types: [created, edited, deleted]
   workflow_dispatch:
 
 permissions:
@@ -11,29 +11,17 @@ permissions:
   pull-requests: write
   id-token: "write"
 
-env:
-  WHITELABEL: ""
-
 jobs:
-  build:
+  android-build:
+    name: Android Build
     runs-on: ubuntu-latest
-    if: ${{ github.event.issue.pull_request && startsWith(github.event.comment.body, '/deploy-internal-') }}
+    if: ${{ github.event_name != 'issue_comment' || (github.event.issue.pull_request && startsWith(github.event.comment.body, '/deploy-internal')) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - run: echo "WHITELABEL=$(echo '${{ github.event.comment.body }}' | sed -n 's|^/deploy-internal-\(.*\)|\1|p')" >> $GITHUB_ENV
+      - name: Extract whitelabel parameter
+        run: echo "WHITELABEL=$(echo '${{ github.event.comment.body }}' | sed -n 's|^/deploy-internal-\(.*\)|\1|p')" >> $GITHUB_ENV
 
-      - name: Set run name
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const runName = `${{ github.actor }} is deploying ${{ env.WHITELABEL }} app`;
-            github.rest.actions.updateWorkflowRun({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              run_id: context.run_id,
-              name: runName
-            });
-
-      - run: echo "running deployment for $WHITELABEL"
+      - name: Display whitelabel
+        run: echo "running deployment for $WHITELABEL"
