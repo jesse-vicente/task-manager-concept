@@ -52,10 +52,10 @@ jobs:
       - name: Increment version
         run: cd mobile && npm version patch
 
-      - run: cd mobile && npm test
-
       - name: Install dependencies
         run: cd mobile && npm install
+
+      - run: cd mobile && npm test
 
       # - uses: android-actions/setup-android@v2
       # - uses: actions/cache@v3
