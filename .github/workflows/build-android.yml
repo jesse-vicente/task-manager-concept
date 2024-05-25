@@ -20,4 +20,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - run: echo "running"
+      - name: Extract whitelabel parameter
+        run: echo "WHITELABEL=$(echo '${{ github.event.comment.body }}' | sed -n 's|^/deploy-internal-\(.*\)|\1|p')" >> $GITHUB_ENV
+
+      - name: Display whitelabel
+        run: echo "running deployment for $WHITELABEL"
