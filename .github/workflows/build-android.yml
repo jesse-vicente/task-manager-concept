@@ -17,10 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event_name != 'issue_comment' || (github.event.issue.pull_request && startsWith(github.event.comment.body, '/deploy-internal')) }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ steps.get-branch.outputs.branch }
 
       - name: Extract whitelabel parameter
         run: echo "WHITELABEL=$(echo '${{ github.event.comment.body }}' | sed -n 's|^/deploy-internal-\(.*\)|\1|p')" >> $GITHUB_ENV
@@ -33,17 +32,11 @@ jobs:
         with:
           node-version: "14"
 
-      - name: Install dependencies
-        run: cd mobile && npm install
-
       - name: Increment version
         run: cd mobile && npm version patch
 
-      - name: Setup JDK 11
-        uses: actions/setup-java@v3
-        with:
-          distribution: "adopt"
-          java-version: "11"
+      - name: Install dependencies
+        run: cd mobile && npm install
 
       - name: Ensure gradlew is executable
         run: chmod +x mobile/android/gradlew
