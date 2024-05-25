@@ -1,23 +1,23 @@
 name: Android Build
 
 on:
-  push:
-    branches:
-      - main
+  issue_comment:
+    types: [created, edited, deleted]
+  workflow_dispatch:
+
+permissions:
+  contents: "write"
+  issues: "write"
+  pull-requests: write
+  id-token: "write"
 
 jobs:
   android-build:
     name: Android Build
     runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'issue_comment' || (github.event.issue.pull_request && startsWith(github.event.comment.body, '/deploy-internal')) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Usar o segredo
-        run: echo "MY_SECRET = '${{ secrets.MY_SECRET }}'"
-
-      - name: Usar o segredo
-        run: echo MY_SECRET 2 = ${{ secrets.MY_SECRET }}
-
-
-
+      - run: echo "running"
