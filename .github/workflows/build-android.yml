@@ -37,6 +37,28 @@ jobs:
         with:
           ref: ${{ steps.get-branch.outputs.branch }}
 
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14
+
+      - name: Install npm dependencies
+        run: npm i --legacy-peer-deps
+
+      # - name: Run Tests
+      #   run: pnpm test
+
+      - uses: android-actions/setup-android@v2
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - uses: gradle/gradle-build-action@v2
+
       - name: Extract whitelabel parameter
         run: echo "WHITELABEL=$(echo '${{ github.event.comment.body }}' | sed -n 's|^/deploy-internal-\(.*\)|\1|p')" >> $GITHUB_ENV
 
