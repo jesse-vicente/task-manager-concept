@@ -22,10 +22,7 @@ platform :android do
   app_project_dir = '**/app'
 
   lane :commit_and_push do
-    commit_android_version_bump(
-      force: true
-    )
-
+    commit_android_version_bump
     push_to_git_remote
   end
 
