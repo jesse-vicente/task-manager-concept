@@ -196,8 +196,8 @@ android {
         }
         mobilize {
           dimension "version"
-          versionCode 38
-          versionName "2.0.3"
+          versionCode 39
+          versionName "3.0.0"
           applicationId "com.renault.mobilize"
         }
         shellrecharge {
