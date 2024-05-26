@@ -2,7 +2,7 @@ default_platform(:android)
 
 platform :android do
   lane :test do
-    gradle_file_path = '**/app/build.gradle'
+    gradle_file_path = './app/build.gradle'
     $project_dir = '**/app'
 
     if !File.file?(gradle_file_path)
