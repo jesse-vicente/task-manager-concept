@@ -53,6 +53,8 @@ jobs:
       - name: Install Fastlane dependencies
         run: cd mobile/android && bundle install
 
+      - run: chmod +x mobile/android/gradlew
+
       - run: cd mobile/android && bundle exec fastlane build
 
   comment:
