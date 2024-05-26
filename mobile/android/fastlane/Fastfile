@@ -48,7 +48,7 @@ platform :android do
     bump_type = options[:bump_type] || BumpType::PATCH
 
     bump_version(
-      flavor: flavor
+      flavor: flavor,
       bump_type: bump_type,
     )
 
