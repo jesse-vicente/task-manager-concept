@@ -3,11 +3,8 @@ default_platform(:android)
 platform :android do
   lane :test do
     increment_version_code
-
-    commit_android_version_bump(
-      force: true,
-    )
-
+    increment_version_name
+    commit_android_version_bump
     push_to_git_remote
   end
 end
