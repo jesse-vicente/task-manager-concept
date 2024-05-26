@@ -13,4 +13,3 @@ jobs:
           owner: ${{ github.repository_owner }}
           repo: ${{ github.repository }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          workflow: "all" # This can be omitted as "all" is the default value
