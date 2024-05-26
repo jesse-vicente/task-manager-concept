@@ -2,7 +2,7 @@ default_platform(:android)
 
 platform :android do
   lane :test do
-    increment_version_code
+    # increment_version_code
 
     increment_version_name
 
