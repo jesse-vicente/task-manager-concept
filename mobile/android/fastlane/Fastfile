@@ -1,6 +1,26 @@
 default_platform(:android)
 
+module Flavor
+  TUPI = 'tupinamba'
+  BYD = 'byd'
+  MOB = 'mobilize'
+  SHELL = 'shellrecharge'
+end
+
+module Task
+  BUNDLE = 'bundle'
+  ASSEMBLE = 'assemble'
+end
+
+module BumpType
+  MAJOR = 'major'
+  MINOR = 'minor'
+  PATCH = 'patch'
+end
+
 platform :android do
+  app_project_dir = '**/app'
+
   lane :commit_and_push do
     commit_android_version_bump(
       force: true
@@ -10,21 +30,33 @@ platform :android do
   end
 
   lane :bump_version do
-    increment_version_code(app_project_dir: '**/app', flavor: 'tupinamba')
-    increment_version_name(app_project_dir: '**/app', flavor: 'tupinamba')
+    increment_version_code(
+      app_project_dir: app_project_dir,
+      flavor: flavor,
+    )
+
+    increment_version_name(
+      app_project_dir: app_project_dir,
+      flavor: flavor,
+      bump_type: bump_type,
+    )
   end
 
   lane :build do |options|
-    task = options[:task] || 'assemble'
-    flavor = options[:flavor] || 'tupinamba'
+    task = options[:task] || Task::ASSEMBLE
+    flavor = options[:flavor] || Flavor::TUPI
+    bump_type = options[:bump_type] || BumpType::PATCH
 
-    bump_version
-
-    gradle(
-      task: task,
-      flavor: flavor,
-      build_type: 'Release',
+    bump_version(
+      flavor: flavor
+      bump_type: bump_type,
     )
+
+    # gradle(
+    #   task: task,
+    #   flavor: flavor,
+    #   build_type: 'Release',
+    # )
 
     commit_and_push
   end

@@ -11,10 +11,14 @@ permissions:
   pull-requests: "write"
   id-token: "write"
 
+env:
+  WHITELABEL: "tupinamba"
+  BUMP_TYPE: "patch"
+
 jobs:
   android-build:
     runs-on: ubuntu-latest
-    # if: ${{ github.event_name != 'issue_comment' || (github.event.issue.pull_request && startsWith(github.event.comment.body, '/deploy-internal')) }}
+    # if: ${{ github.event_name != 'issue_comment' || (github.event.issue.pull_request && startsWith(github.event.comment.body, '/deploy-')) }}
     steps:
       - name: Update comment with deployment in progress
         if: github.event_name == 'issue_comment'
@@ -60,9 +64,13 @@ jobs:
       - uses: gradle/gradle-build-action@v2
 
       - name: Extract whitelabel parameter
-        run: echo "WHITELABEL=$(echo '${{ github.event.comment.body }}' | sed -n 's|^/deploy-internal-\(.*\)|\1|p')" >> $GITHUB_ENV
+        run: |
+          WHITELABEL_PARAM=$(echo '${{ github.event.comment.body }}' | sed -n 's|^/deploy-\(.*\)|\1|p')
+          if [ ! -z "$WHITELABEL_PARAM" ]; then
+            echo "WHITELABEL=$WHITELABEL_PARAM" >> $GITHUB_ENV
+          fi
 
-      - run: echo "bundle exec fastlane deploy flavor:$WHITELABEL"
+      - run: echo "cd mobile/android && bundle exec fastlane deploy flavor:${{ env.WHITELABEL }}"
 
       - uses: ruby/setup-ruby@v1
         with:
@@ -77,7 +85,7 @@ jobs:
 
       - run: chmod +x mobile/android/gradlew
 
-      - run: cd mobile/android && bundle exec fastlane build
+      - run: "cd mobile/android && bundle exec fastlane build flavor:${{ env.WHITELABEL }}"
 
   comment:
     needs: [android-build]
