@@ -1,0 +1,16 @@
+name: Delete Workflow Runs
+
+on:
+  workflow_dispatch:
+
+jobs:
+  delete-runs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete workflow runs
+        uses: JuvenileQ/delete-workflow-runs@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          retain_days: 0  # Set to 0 to delete all runs
+          keep_minimum_runs: 0  # Set to 0 to not retain any runs
