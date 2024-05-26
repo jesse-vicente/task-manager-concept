@@ -10,15 +10,15 @@ platform :android do
     end
 
     increment_version_code(
-      gradle_file_path: gradle_file_path
+      app_project_dir: $project_dir,
     )
 
     increment_version_name(
-      gradle_file_path: gradle_file_path
+      app_project_dir: $project_dir,
     )
 
     commit_android_version_bump(
-      gradle_file_path: gradle_file_path,
+      app_project_dir: $project_dir,
       force: true
     )
 
