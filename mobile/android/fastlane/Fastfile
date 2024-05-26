@@ -2,9 +2,26 @@ default_platform(:android)
 
 platform :android do
   lane :test do
-    increment_version_code
-    increment_version_name
-    commit_android_version_bump
+    gradle_file_path = 'mobile/android/app/build.gradle'
+    $project_dir = '**/app'
+
+    if !File.file?(gradle_file_path)
+      UI.user_error!("Cannot find the build.gradle file at path: #{gradle_file_path}")
+    end
+
+    increment_version_code(
+      gradle_file_path: gradle_file_path
+    )
+
+    increment_version_name(
+      gradle_file_path: gradle_file_path
+    )
+
+    commit_android_version_bump(
+      gradle_file_path: gradle_file_path,
+      force: true
+    )
+
     push_to_git_remote
   end
 end
