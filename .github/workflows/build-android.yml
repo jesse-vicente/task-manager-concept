@@ -1,5 +1,6 @@
 name: build-android
-run-name: ${{github.actor}} is deploying android app
+run-name: ${{ github.actor }} is deploying android app
+
 on:
   issue_comment:
     types: [created, edited, deleted]
@@ -19,46 +20,35 @@ jobs:
   build-android:
     runs-on: ubuntu-latest
     outputs:
-      whitelabel: ${{ steps.vars.outputs.WHITELABEL }}
-      bump_type: ${{ steps.vars.outputs.BUMP_TYPE }}
+      whitelabel: ${{ steps.set-vars.outputs.WHITELABEL }}
+      bump_type: ${{ steps.set-vars.outputs.BUMP_TYPE }}
 
     if: ${{ github.event_name != 'issue_comment' || (github.event.issue.pull_request && startsWith(github.event.comment.body, '/deploy-')) }}
     steps:
       - name: Set vars
         if: github.event_name == 'issue_comment'
-        id: vars
+        id: set-vars
         run: |-
-          whitelabel=$(echo '${{ github.event.comment.body }}' | sed -n 's|^/deploy-\(.*\)|\1|p')
+          whitelabel=$(echo '${{ github.event.comment.body }}' | sed -n 's|^/deploy-\([^ ]*\).*|\1|p')
           bump_type=$(echo '${{ github.event.comment.body }}' | sed -n 's|.*bump_type:\([a-zA-Z0-9_-]*\).*|\1|p')
+
+          if [ -z "$whitelabel" ]; then
+            whitelabel="${{ env.WHITELABEL }}"
+          fi
+          if [ -z "$bump_type" ]; then
+            bump_type="${{ env.BUMP_TYPE }}"
+          fi
+
           echo "WHITELABEL=$whitelabel" >> $GITHUB_ENV
           echo "BUMP_TYPE=$bump_type" >> $GITHUB_ENV
           echo "WHITELABEL=$whitelabel" >> $GITHUB_OUTPUT
           echo "BUMP_TYPE=$bump_type" >> $GITHUB_OUTPUT
 
-      - run: echo "cd mobile/android && bundle exec fastlane deploy flavor:${{ env.WHITELABEL }} bump_type:${{ env.BUMP_TYPE }}"
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Update comment with deployment in progress
-        if: github.event_name == 'issue_comment'
-        uses: jungwinter/comment@v1
-        with:
-          type: edit
-          body: "${{ github.event.comment.body }}\n\n⏳ [**Build in PROGRESS for ${{ env.WHITELABEL }} whitelabel...**](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
-          comment_id: ${{ github.event.comment.id }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - id: "get-branch"
-        if: github.event_name == 'issue_comment'
-        run: echo "branch=$(gh pr view $PR_NO --repo $REPO --json headRefName --jq '.headRefName')" >> $GITHUB_OUTPUT
-        env:
-          REPO: ${{ github.repository }}
-          PR_NO: ${{ github.event.issue.number }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ steps.get-branch.outputs.branch }}
-
-      - uses: ruby/setup-ruby@v1
+      - name: Install Ruby and Bundler
+        uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.3.0
 
@@ -69,14 +59,15 @@ jobs:
       - name: Install Fastlane dependencies
         run: cd mobile/android && bundle install
 
-      - run: "cd mobile/android && bundle exec fastlane build flavor:${{ env.WHITELABEL }} bump_type:${{ env.BUMP_TYPE }}"
+      - run: |
+          cd mobile/android
+          bundle exec fastlane build flavor:${{ env.WHITELABEL }} bump_type:${{ env.BUMP_TYPE }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: build
-          path: |
-            mobile/android/app/build.gradle
+          path: mobile/android/app/build.gradle
 
   comment:
     needs: [build-android]
