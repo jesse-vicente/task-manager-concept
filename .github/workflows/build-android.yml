@@ -1,5 +1,5 @@
-name: Android Build
-run-name: ${{github.actor}} is deploying to PlayStore internal track
+name: build-android
+run-name: ${{github.actor}} is deploying android app
 on:
   issue_comment:
     types: [created, edited, deleted]
@@ -16,16 +16,33 @@ env:
   BUMP_TYPE: "patch"
 
 jobs:
-  android-build:
+  build-android:
     runs-on: ubuntu-latest
-    # if: ${{ github.event_name != 'issue_comment' || (github.event.issue.pull_request && startsWith(github.event.comment.body, '/deploy-')) }}
+    outputs:
+      whitelabel: ${{ steps.vars.outputs.WHITELABEL }}
+      bump_type: ${{ steps.vars.outputs.BUMP_TYPE }}
+
+    if: ${{ github.event_name != 'issue_comment' || (github.event.issue.pull_request && startsWith(github.event.comment.body, '/deploy-')) }}
     steps:
+      - name: Set vars
+        if: github.event_name == 'issue_comment'
+        id: vars
+        run: |-
+          whitelabel=$(echo '${{ github.event.comment.body }}' | sed -n 's|^/deploy-\(.*\)|\1|p')
+          bump_type=$(echo '${{ github.event.comment.body }}' | sed -n 's|.*bump_type:\([a-zA-Z0-9_-]*\).*|\1|p')
+          echo "WHITELABEL=$whitelabel" >> $GITHUB_ENV
+          echo "BUMP_TYPE=$bump_type" >> $GITHUB_ENV
+          echo "WHITELABEL=$whitelabel" >> $GITHUB_OUTPUT
+          echo "BUMP_TYPE=$bump_type" >> $GITHUB_OUTPUT
+
+      - run: echo "cd mobile/android && bundle exec fastlane deploy flavor:${{ env.WHITELABEL }} bump_type:${{ env.BUMP_TYPE }}"
+
       - name: Update comment with deployment in progress
         if: github.event_name == 'issue_comment'
         uses: jungwinter/comment@v1
         with:
           type: edit
-          body: "${{ github.event.comment.body }}\n\n⏳ [**Deployment in progress...**](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          body: "${{ github.event.comment.body }}\n\n⏳ [**Build in PROGRESS for ${{ env.WHITELABEL }} whitelabel...**](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
           comment_id: ${{ github.event.comment.id }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -41,37 +58,6 @@ jobs:
         with:
           ref: ${{ steps.get-branch.outputs.branch }}
 
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 14
-
-      - name: Install npm dependencies
-        run: cd mobile && npm i --legacy-peer-deps
-
-      # - name: Run Tests
-      #   run: pnpm test
-
-      - uses: android-actions/setup-android@v2
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
-      - uses: gradle/gradle-build-action@v2
-
-      - name: Extract whitelabel parameter
-        run: |
-          WHITELABEL_PARAM=$(echo '${{ github.event.comment.body }}' | sed -n 's|^/deploy-\(.*\)|\1|p')
-          if [ ! -z "$WHITELABEL_PARAM" ]; then
-            echo "WHITELABEL=$WHITELABEL_PARAM" >> $GITHUB_ENV
-          fi
-
-      - run: echo "cd mobile/android && bundle exec fastlane deploy flavor:${{ env.WHITELABEL }}"
-
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.3.0
@@ -83,12 +69,17 @@ jobs:
       - name: Install Fastlane dependencies
         run: cd mobile/android && bundle install
 
-      - run: chmod +x mobile/android/gradlew
+      - run: "cd mobile/android && bundle exec fastlane build flavor:${{ env.WHITELABEL }} bump_type:${{ env.BUMP_TYPE }}"
 
-      - run: "cd mobile/android && bundle exec fastlane build flavor:${{ env.WHITELABEL }}"
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: build
+          path: |
+            mobile/android/app/build.gradle
 
   comment:
-    needs: [android-build]
+    needs: [build-android]
     runs-on: ubuntu-latest
 
     steps:
@@ -98,7 +89,7 @@ jobs:
         with:
           type: edit
           comment_id: ${{ github.event.comment.id }}
-          body: "${{ github.event.comment.body }}\n\n🚀 [**Deployment to staging SUCCESSFUL**](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          body: "${{ github.event.comment.body }}\n\n🚀 [**Build SUCCESSFUL for ${{ needs.build-android.outputs.whitelabel }} whitelabel**](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update comment with deployment failure
@@ -107,5 +98,5 @@ jobs:
         with:
           type: edit
           comment_id: ${{ github.event.comment.id }}
-          body: "${{ github.event.comment.body }}\n\n❌ [**Deployment to staging FAILED**](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          body: "${{ github.event.comment.body }}\n\n❌ [**Build FAILED for ${{ needs.build-android.outputs.whitelabel }} whitelabel**](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
           token: ${{ secrets.GITHUB_TOKEN }}
