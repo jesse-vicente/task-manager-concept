@@ -1,16 +1,31 @@
 default_platform(:android)
 
 platform :android do
-  lane :test do
-    android_set_version_code
-    android_set_version_name(
-      bump_type: 'patch'
-    )
-
+  lane :commit_and_push do
     commit_android_version_bump(
       force: true
     )
 
     push_to_git_remote
+  end
+
+  lane :bump_version do
+    increment_version_code(app_project_dir: '**/app', flavor: 'tupinamba')
+    increment_version_name(app_project_dir: '**/app', flavor: 'tupinamba')
+  end
+
+  lane :build do |options|
+    task = options[:task] || 'assemble'
+    flavor = options[:flavor] || 'tupinamba'
+
+    bump_version
+
+    gradle(
+      task: task,
+      flavor: flavor,
+      build_type: 'Release',
+    )
+
+    commit_and_push
   end
 end

@@ -46,15 +46,14 @@ jobs:
         with:
           ruby-version: 3.3.0
 
-      # - name: Set Git config
-      #   run: |
-      #     git config user.email "${{ github.actor }}@users.noreply.github.com"
-      #     git config user.name "${{ github.actor }}"
+      - run: |
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git config user.name "${{ github.actor }}"
 
       - name: Install Fastlane dependencies
         run: cd mobile/android && bundle install
 
-      - run: cd mobile/android && bundle exec fastlane test
+      - run: cd mobile/android && bundle exec fastlane build
 
   comment:
     needs: [android-build]

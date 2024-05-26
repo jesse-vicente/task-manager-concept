@@ -3,4 +3,4 @@
 # Ensure this file is checked in to source control!
 
 gem 'fastlane-plugin-commit_android_version_bump'
-gem 'fastlane-plugin-versioning_android'
+gem 'fastlane-plugin-android_versioning'
