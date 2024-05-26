@@ -190,8 +190,8 @@ android {
     productFlavors {
         tupinamba {
           dimension "version"
-          versionCode 131
-          versionName "2.0.4"
+          versionCode 132
+          versionName "2.1.0"
           applicationId "com.tupinamba"
         }
         mobilize {
