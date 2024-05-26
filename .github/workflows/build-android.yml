@@ -13,37 +13,17 @@ permissions:
   id-token: "write"
 
 env:
-  WHITELABEL: "tupinamba"
-  BUMP_TYPE: "patch"
+  DEFAULT_WHITELABEL: "tupinamba"
+  DEFAULT_BUMP_TYPE: "patch"
 
 jobs:
   build-android:
     runs-on: ubuntu-latest
     outputs:
-      whitelabel: ${{ steps.set-vars.outputs.WHITELABEL }}
-      bump_type: ${{ steps.set-vars.outputs.BUMP_TYPE }}
+      whitelabel: ${{ steps.build.outputs.WHITELABEL }}
 
-    if: ${{ github.event_name != 'issue_comment' || (github.event.issue.pull_request && startsWith(github.event.comment.body, '/deploy-')) }}
+    if: ${{ github.event_name != 'issue_comment' || (github.event_name == 'issue_comment' && startsWith(github.event.comment.body, '/build-')) }}
     steps:
-      - name: Set vars
-        if: github.event_name == 'issue_comment'
-        id: set-vars
-        run: |-
-          whitelabel=$(echo '${{ github.event.comment.body }}' | sed -n 's|^/deploy-\([^ ]*\).*|\1|p')
-          bump_type=$(echo '${{ github.event.comment.body }}' | sed -n 's|.*bump_type:\([a-zA-Z0-9_-]*\).*|\1|p')
-
-          if [ -z "$whitelabel" ]; then
-            whitelabel="${{ env.WHITELABEL }}"
-          fi
-          if [ -z "$bump_type" ]; then
-            bump_type="${{ env.BUMP_TYPE }}"
-          fi
-
-          echo "WHITELABEL=$whitelabel" >> $GITHUB_ENV
-          echo "BUMP_TYPE=$bump_type" >> $GITHUB_ENV
-          echo "WHITELABEL=$whitelabel" >> $GITHUB_OUTPUT
-          echo "BUMP_TYPE=$bump_type" >> $GITHUB_OUTPUT
-
       - id: "get-branch"
         if: github.event_name == 'issue_comment'
         run: echo "branch=$(gh pr view $PR_NO --repo $REPO --json headRefName --jq '.headRefName')" >> $GITHUB_OUTPUT
@@ -68,9 +48,32 @@ jobs:
       - name: Install Fastlane dependencies
         run: cd mobile/android && bundle install
 
-      - run: |
+      - id: "build"
+        name: "Build app(s)"
+        if: github.event_name == 'issue_comment' && startsWith(github.event.comment.body, '/build-')
+        run: |
           cd mobile/android
-          bundle exec fastlane build flavor:${{ env.WHITELABEL }} bump_type:${{ env.BUMP_TYPE }}
+
+          whitelabels=('tupinamba' 'byd' 'mobilize' 'shellrecharge')
+          whitelabel=$(echo '${{ github.event.comment.body }}' | sed -n 's|^/build-\([^ ]*\).*|\1|p')
+          bump_type=$(echo '${{ github.event.comment.body }}' | sed -n 's|.*bump_type:\([a-zA-Z0-9_-]*\).*|\1|p')
+
+          if [ -z "$bump_type" ]; then
+            bump_type="${{ env.DEFAULT_BUMP_TYPE }}"
+          fi
+
+          echo "WHITELABEL=$whitelabel" >> $GITHUB_OUTPUT
+
+          if [[ "$whitelabel" == "all" ]]; then
+            for whitelabel in "${whitelabels[@]}"; do
+              bundle exec fastlane build flavor:$whitelabel bump_type:$bump_type
+            done
+          else
+            bundle exec fastlane build flavor:$whitelabel bump_type:$bump_type
+          fi
+
+          bundle exec fastlane commit_version_bump
+          bundle exec fastlane push_version_bump
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
