@@ -29,7 +29,10 @@ platform :android do
     push_to_git_remote
   end
 
-  lane :bump_version do
+  lane :bump_version do |options|
+    flavor = options[:flavor] || Flavor::TUPI
+    bump_type = options[:bump_type] || BumpType::PATCH
+
     increment_version_code(
       app_project_dir: app_project_dir,
       flavor: flavor,
