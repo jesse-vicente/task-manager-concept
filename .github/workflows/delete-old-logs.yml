@@ -1,0 +1,16 @@
+name: Delete Workflow Runs
+
+on:
+  workflow_dispatch:
+
+jobs:
+  delete-runs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete all workflow runs
+        uses: christosgalano/delete-workflow-runs@v1.0.0
+        with:
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.repository }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          workflow: "all" # This can be omitted as "all" is the default value
