@@ -7,5 +7,7 @@ platform :android do
     commit_android_version_bump(
       force: true,
     )
+
+    push_to_git_remote
   end
 end
