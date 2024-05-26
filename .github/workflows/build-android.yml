@@ -44,8 +44,17 @@ jobs:
           echo "WHITELABEL=$whitelabel" >> $GITHUB_OUTPUT
           echo "BUMP_TYPE=$bump_type" >> $GITHUB_OUTPUT
 
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - id: "get-branch"
+        if: github.event_name == 'issue_comment'
+        run: echo "branch=$(gh pr view $PR_NO --repo $REPO --json headRefName --jq '.headRefName')" >> $GITHUB_OUTPUT
+        env:
+          REPO: ${{ github.repository }}
+          PR_NO: ${{ github.event.issue.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.get-branch.outputs.branch }}
 
       - name: Install Ruby and Bundler
         uses: ruby/setup-ruby@v1
