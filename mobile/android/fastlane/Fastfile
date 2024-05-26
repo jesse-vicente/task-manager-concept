@@ -2,9 +2,8 @@ default_platform(:android)
 
 platform :android do
   lane :test do
-    # increment_version_code
-
-    increment_version_name
+    android_set_version_code
+    android_set_version_name
 
     commit_android_version_bump(
       force: true
