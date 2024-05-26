@@ -2,7 +2,7 @@ default_platform(:android)
 
 platform :android do
   lane :test do
-    gradle_file_path = 'mobile/android/app/build.gradle'
+    gradle_file_path = 'app/build.gradle'
     $project_dir = '**/app'
 
     if !File.file?(gradle_file_path)
@@ -10,15 +10,15 @@ platform :android do
     end
 
     increment_version_code(
-      app_project_dir: $project_dir,
+      gradle_file_path: gradle_file_path
     )
 
     increment_version_name(
-      app_project_dir: $project_dir,
+      gradle_file_path: gradle_file_path
     )
 
     commit_android_version_bump(
-      app_project_dir: $project_dir,
+      gradle_file_path: gradle_file_path,
       force: true
     )
 
