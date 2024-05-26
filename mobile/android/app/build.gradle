@@ -190,20 +190,20 @@ android {
     productFlavors {
         tupinamba {
           dimension "version"
-          versionCode 132
-          versionName "2.1.0"
+          versionCode 133
+          versionName "2.1.1"
           applicationId "com.tupinamba"
         }
         mobilize {
           dimension "version"
-          versionCode 39
-          versionName "3.0.0"
+          versionCode 40
+          versionName "3.0.1"
           applicationId "com.renault.mobilize"
         }
         shellrecharge {
           dimension "version"
-          versionCode 38
-          versionName "2.1.0"
+          versionCode 39
+          versionName "2.1.1"
           applicationId "com.raizen.shellrecharge"
         }
         neocharge {
@@ -213,8 +213,8 @@ android {
         }
         byd {
           dimension "version"
-          versionCode 8
-          versionName "3.1.0"
+          versionCode 9
+          versionName "3.1.1"
           applicationId "com.byd"
         }
     }
