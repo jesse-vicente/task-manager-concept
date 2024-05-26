@@ -3,7 +3,9 @@ default_platform(:android)
 platform :android do
   lane :test do
     android_set_version_code
-    android_set_version_name
+    android_set_version_name(
+      bump_type: 'patch'
+    )
 
     commit_android_version_bump(
       force: true
