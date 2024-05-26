@@ -72,8 +72,7 @@ jobs:
             bundle exec fastlane build flavor:$whitelabel bump_type:$bump_type
           fi
 
-          bundle exec fastlane commit_version_bump
-          bundle exec fastlane push_version_bump
+          bundle exec fastlane commit_and_push_version_bump
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2

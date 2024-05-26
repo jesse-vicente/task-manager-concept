@@ -21,13 +21,8 @@ end
 platform :android do
   app_project_dir = '**/app'
 
-  lane :commit_version_bump do
-    commit_android_version_bump(
-      force: true
-    )
-  end
-
-  lane :push_version_bump do
+  lane :commit_and_push_version_bump do
+    commit_android_version_bump(force: true)
     push_to_git_remote
   end
 
