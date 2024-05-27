@@ -60,7 +60,7 @@ jobs:
 
           if [ "${{ github.event_name }}" == "issue_comment" ]; then
             whitelabel=$(echo '${{ github.event.comment.body }}' | sed -n 's|^/build-\([^ ]*\).*|\1|p')
-            bump_type:$(echo '${{ github.event.comment.body }}' | sed -n 's|.*bump_type:\([a-zA-Z0-9_-]*\).*|\1|p')
+            bump_type=$(echo '${{ github.event.comment.body }}' | sed -n 's|.*bump_type:\([a-zA-Z0-9_-]*\).*|\1|p')
 
             [[ -z "$whitelabel" ]] && whitelabel="${{ env.DEFAULT_WHITELABEL }}"
             [[ -z "$bump_type" ]] && bump_type="${{ env.DEFAULT_BUMP_TYPE }}"
