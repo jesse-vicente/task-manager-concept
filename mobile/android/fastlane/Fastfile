@@ -34,8 +34,6 @@ platform :android do
       bump_type: bump_type,
     )
 
-    commit_and_push_version_bump
-
     # gradle(
     #   task: task,
     #   flavor: flavor,

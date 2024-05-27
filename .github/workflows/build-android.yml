@@ -73,21 +73,24 @@ jobs:
 
                 for i in "${!whitelabels[@]}"; do
                     wl=${whitelabels[$i]}
-                    alias=${whitelabels_alias[$i]}
-                    env_file_name="ENV_FILE_${alias^^}"
+                    wl_alias=${whitelabels_alias[$i]}
+                    env_file_name="ENV_FILE_${wl_alias^^}"
                     env_file_path=${!env_file_name}
-                    bundle exec ENVFILE=$env_file_path fastlane build flavor:$wl bump_type=$bump_type
+                    echo "ENVFILE=$env_file_path bundle exec fastlane build flavor:$wl bump_type=$bump_type"
+                    ENVFILE=$env_file_path bundle exec fastlane build flavor:$wl bump_type=$bump_type
                 done
             else
                 env_file_name="ENV_FILE_${whitelabel^^}"
                 env_file_path=${!env_file_name}
-                gcloud secrets versions access latest --verbosity=debug --project=tupinamba-prod --secret=${whitelabel}-mobile-dot-env --out-file=$env_file_path
-                bundle exec fastlane build flavor:$whitelabel bump_type=$bump_type
+                echo "ENVFILE=$env_file_path bundle exec fastlane build flavor:$whitelabel bump_type=$bump_type"
+                ENVFILE=$env_file_path bundle exec fastlane build flavor:$whitelabel bump_type=$bump_type
             fi
           else
             echo "gcloud secrets versions access latest --verbosity=debug --project=tupinamba-prod --secret=${{ env.DEFAULT_WHITELABEL }}-mobile-dot-env --out-file=${ENV_FILE_TUPI}"
-            bundle exec ENVFILE=${{ env.ENV_FILE_TUPI }} fastlane build bump_type=${{ env.DEFAULT_BUMP_TYPE }}
+            ENVFILE=${{ env.ENV_FILE_TUPI }} bundle exec fastlane build bump_type=${{ env.DEFAULT_BUMP_TYPE }}
           fi
+
+          bundle exec fastlane commit_and_push_version_bump
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
