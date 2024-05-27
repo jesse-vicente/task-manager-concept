@@ -218,8 +218,8 @@ android {
         }
         byd {
           dimension "version"
-          versionCode 12
-          versionName "3.1.4"
+          versionCode 13
+          versionName "3.1.5"
           applicationId "com.byd"
         }
     }
