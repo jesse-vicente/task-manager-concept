@@ -60,7 +60,7 @@ jobs:
 
           if [ "${{ github.event_name }}" == "issue_comment" ]; then
             whitelabel=$(echo '${{ github.event.comment.body }}' | sed -n 's|^/build-\([^ ]*\).*|\1|p')
-            bump_type=$(echo '${{ github.event.comment.body }}' | sed -n 's|.*bump_type:\([a-zA-Z0-9_-]*\).*|\1|p')
+            bump_type:$(echo '${{ github.event.comment.body }}' | sed -n 's|.*bump_type:\([a-zA-Z0-9_-]*\).*|\1|p')
 
             [[ -z "$whitelabel" ]] && whitelabel="${{ env.DEFAULT_WHITELABEL }}"
             [[ -z "$bump_type" ]] && bump_type="${{ env.DEFAULT_BUMP_TYPE }}"
@@ -76,18 +76,18 @@ jobs:
                     wl_alias=${whitelabels_alias[$i]}
                     env_file_name="ENV_FILE_${wl_alias^^}"
                     env_file_path=${!env_file_name}
-                    echo "ENVFILE=$env_file_path bundle exec fastlane build flavor:$wl bump_type=$bump_type"
-                    ENVFILE=$env_file_path bundle exec fastlane build flavor:$wl bump_type=$bump_type
+                    echo "ENVFILE=$env_file_path bundle exec fastlane build flavor:$wl bump_type:$bump_type"
+                    ENVFILE=$env_file_path bundle exec fastlane build flavor:$wl bump_type:$bump_type
                 done
             else
                 env_file_name="ENV_FILE_${whitelabel^^}"
                 env_file_path=${!env_file_name}
-                echo "ENVFILE=$env_file_path bundle exec fastlane build flavor:$whitelabel bump_type=$bump_type"
-                ENVFILE=$env_file_path bundle exec fastlane build flavor:$whitelabel bump_type=$bump_type
+                echo "ENVFILE=$env_file_path bundle exec fastlane build flavor:$whitelabel bump_type:$bump_type"
+                ENVFILE=$env_file_path bundle exec fastlane build flavor:$whitelabel bump_type:$bump_type
             fi
           else
             echo "gcloud secrets versions access latest --verbosity=debug --project=tupinamba-prod --secret=${{ env.DEFAULT_WHITELABEL }}-mobile-dot-env --out-file=${ENV_FILE_TUPI}"
-            ENVFILE=${{ env.ENV_FILE_TUPI }} bundle exec fastlane build bump_type=${{ env.DEFAULT_BUMP_TYPE }}
+            ENVFILE=${{ env.ENV_FILE_TUPI }} bundle exec fastlane build bump_type:${{ env.DEFAULT_BUMP_TYPE }}
           fi
 
           bundle exec fastlane commit_and_push_version_bump
