@@ -15,6 +15,10 @@ permissions:
 env:
   DEFAULT_WHITELABEL: "tupinamba"
   DEFAULT_BUMP_TYPE: "patch"
+  ENV_FILE_TUPI: "tmp/build-production/.env.tupi.prod"
+  ENV_FILE_BYD: "tmp/build-production/.env.byd.prod"
+  ENV_FILE_MOB: "tmp/build-production/.env.mob.prod"
+  ENV_FILE_SHELL: "tmp/build-production/.env.shell.prod"
 
 jobs:
   build-android:
@@ -50,26 +54,40 @@ jobs:
 
       - id: "build"
         name: "Build app(s)"
-        if: github.event_name == 'issue_comment' && startsWith(github.event.comment.body, '/build-')
+        if: github.event_name != 'issue_comment' || (github.event.issue.pull_request && startsWith(github.event.comment.body, '/build-'))
         run: |
           cd mobile/android
 
-          whitelabels=('tupinamba' 'byd' 'mobilize' 'shellrecharge')
-          whitelabel=$(echo '${{ github.event.comment.body }}' | sed -n 's|^/build-\([^ ]*\).*|\1|p')
-          bump_type=$(echo '${{ github.event.comment.body }}' | sed -n 's|.*bump_type:\([a-zA-Z0-9_-]*\).*|\1|p')
+          if [ "${{ github.event_name }}" == "issue_comment" ]; then
+            whitelabel=$(echo '${{ github.event.comment.body }}' | sed -n 's|^/build-\([^ ]*\).*|\1|p')
+            bump_type:$(echo '${{ github.event.comment.body }}' | sed -n 's|.*bump_type:\([a-zA-Z0-9_-]*\).*|\1|p')
 
-          if [ -z "$bump_type" ]; then
-            bump_type="${{ env.DEFAULT_BUMP_TYPE }}"
-          fi
+            [[ -z "$whitelabel" ]] && whitelabel="${{ env.DEFAULT_WHITELABEL }}"
+            [[ -z "$bump_type" ]] && bump_type="${{ env.DEFAULT_BUMP_TYPE }}"
 
-          echo "WHITELABEL=$whitelabel" >> $GITHUB_OUTPUT
+            echo "WHITELABEL=$whitelabel" >> $GITHUB_OUTPUT
 
-          if [[ "$whitelabel" == "all" ]]; then
-            for whitelabel in "${whitelabels[@]}"; do
-              bundle exec fastlane build flavor:$whitelabel bump_type:$bump_type
-            done
+            if [ "$whitelabel" == "all" ]; then
+                whitelabels=('tupinamba' 'byd' 'mobilize' 'shellrecharge')
+                whitelabels_alias=('tupi' 'byd' 'mob' 'shell')
+
+                for i in "${!whitelabels[@]}"; do
+                    wl=${whitelabels[$i]}
+                    wl_alias=${whitelabels_alias[$i]}
+                    env_file_name="ENV_FILE_${wl_alias^^}"
+                    env_file_path=${!env_file_name}
+                    echo "ENVFILE=$env_file_path bundle exec fastlane build flavor:$wl bump_type:$bump_type"
+                    ENVFILE=$env_file_path bundle exec fastlane build flavor:$wl bump_type:$bump_type
+                done
+            else
+                env_file_name="ENV_FILE_${whitelabel^^}"
+                env_file_path=${!env_file_name}
+                echo "ENVFILE=$env_file_path bundle exec fastlane build flavor:$whitelabel bump_type:$bump_type"
+                ENVFILE=$env_file_path bundle exec fastlane build flavor:$whitelabel bump_type:$bump_type
+            fi
           else
-            bundle exec fastlane build flavor:$whitelabel bump_type:$bump_type
+            echo "gcloud secrets versions access latest --verbosity=debug --project=tupinamba-prod --secret=${{ env.DEFAULT_WHITELABEL }}-mobile-dot-env --out-file=${ENV_FILE_TUPI}"
+            ENVFILE=${{ env.ENV_FILE_TUPI }} bundle exec fastlane build bump_type:${{ env.DEFAULT_BUMP_TYPE }}
           fi
 
           bundle exec fastlane commit_and_push_version_bump
